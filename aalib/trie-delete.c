@@ -25,6 +25,7 @@ walk_chain_to_delete(
 		if (curSearchNode->isKeySoHasValue) {
 			*value = curSearchNode->value;
 			curSearchNode->isKeySoHasValue = 0;
+			free(curSearchNode->value);
 			curSearchNode->value = NULL;
 		}
 		return 1;
