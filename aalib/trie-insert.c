@@ -23,10 +23,22 @@ trie_subtreeSearchComparator(const void *keyValue, const void *nodePtr)
 static TrieNode *
 trie_create_chain(AAKeyType key, size_t keylength, void *value, int *cost)
 {
-	TrieNode *current = NULL;
+	TrieNode *current = trieCreateNode();
 
 	// TO DO: create a new chain the the required key letters
+	int i;
+	for (i = 1; i < keylength; i++){
+		TrieNode* newNode = trieCreateNode();
+		newNode->letter = key[i];
+		current->subtries[current->nSubtries++] = newNode;
+		current = newNode;
+		if (cost != NULL) {
+			(*cost)++;
+		}
+	}
 
+	current->isKeySoHasValue = 1;
+	current->value = value;
 	return current;
 }
 
@@ -42,9 +54,20 @@ trie_add_chain(
 	// of the key may be used to organize where within the set of
 	// subtries you add this
 
+	int index = key[0] % nSubtries;
+	TrieNode *existingChain = subtreeList[index];
+
+	if (existingChain == NULL) {
+		subtreeList[index] = newChain;
+		return 0;
+	}
+
+	else {
+
 	// TO DO: you probably want to replace this return statement
 	// with your own code
 	return -1;
+	}
 }
 
 
@@ -57,10 +80,38 @@ trie_link_to_chain(TrieNode *current,
 	// TO DO: add the remaining portions of the key
 	// into this chain, forming a new branch if and when
 	// they stop matching existing letters within the subtries
+	int i;
+	AAKeyType remainingKey;
+	for (size_t i = 0; i < keylength; i++) {
+		remainingKey = key + i;
+
+		int found = 0;
+		int j;
+		for (j = 0; j < current->nSubtries; j++) {
+			if (current->subtries[j]->letter == remainingKey[0]) {
+				current = current->subtries[j];
+				found = 1;
+				break;
+			}
+		}
+
+		if (!found) {
+			TrieNode *newNode = trieCreateNode();
+			newNode->letter = remainingKey[0];
+			current->subtries[current->nSubtries++] = newNode;
+			current = newNode;
+			if (cost != NULL) {
+				(*cost)++;
+			}
+		}
+	}
+
+	current->isKeySoHasValue = 1;
+	current->value = value;
 
 	// TO DO: you probably want to replace this return statement
 	// with your own code
-	return -1;
+	return 0;
 }
 
 
@@ -83,10 +134,19 @@ trieInsertKey(KeyValueTrie *root,
 	// TO DO: find the subtrie with the leading letter of the
 	// key, and insert the new key into the correct subtrie
 	// chain based on that letter
+	int index = key[0] % root->nSubtries;
+	TrieNode *subtree = root->subtries[index];
+
+	if (subtree == NULL) {
+		root->subtries[index] = trie_create_chain(key, keylength, value, cost);
+	}
+	else {
+		trie_link_to_chain(subtree, key, keylength, value, cost);
+	}
 
 	// TO DO: you probably want to replace this return statement
 	// with your own code
-	return -1;
+	return 0;
 }
 
 

@@ -19,6 +19,13 @@ void *trieLookupKey(
 	// our walk
 
 	/** return null if the node doesn't have a value */
+	if (root->nSubtries == 0) {
+		return NULL;
+	}
+
+	int index = key[0] % root->nSubtries;
+	TrieNode *subtree = root->subtries[index];
+
 	return NULL;
 }
 

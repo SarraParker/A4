@@ -17,7 +17,25 @@ walk_chain_to_delete(
 	)
 {
 	// TO DO: remove nodes for deleted key
-	return 0;
+	if (curSearchNode == NULL) {
+		return 0;
+	}
+
+	if (keylength == 0) {
+		if (curSearchNode->isKeySoHasValue) {
+			*value = curSearchNode->value;
+			curSearchNode->isKeySoHasValue = 0;
+			curSearchNode->value = NULL;
+		}
+		return 1;
+	}
+
+	int index = key[0] % curSearchNode->nSubtries;
+	TrieNode *nextNode = curSearchNode->subtries[index];
+
+	int deleted = walk_chain_to_delete(value, nextNode, key + 1, keylength - 1, cost);
+
+	return deleted;
 }
 
 /** delete a key from the trie */
@@ -37,6 +55,11 @@ void *trieDeleteKey(
 	/**
 	 ** TO DO: search for the right subchain and delete the key from it
 	 **/
+
+	int index = key[0] % root->nSubtries;
+	TrieNode *subtree = root->subtries[index];
+
+	walk_chain_to_delete(&valueFromDeletedKey, subtree, key, keylength, cost);
 	
 	return valueFromDeletedKey;
 }
